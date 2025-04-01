@@ -29,7 +29,7 @@ class FileList(ft.Column):
         ### getting files
         # filelist = glob.glob(f"{filedir}/*")
         filelist = get_s3List(filedir)
-        # get_s3Object(filedir)
+        get_s3Object(filedir)
         for path in filelist:
             self.controls.append(FileName(path, self.clear_blue))
 
@@ -138,7 +138,7 @@ def main(page: ft.Page) -> None:
         for control in file_list.controls:
             if control.controls[0].value:
                 save_files.append(control.controls[1].text)
-        # put_s3Object(file_path, save_files)
+        put_s3Object(file_path, save_files)
 
     def on_cancer(e):
         global file_list
