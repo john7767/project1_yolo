@@ -14,12 +14,14 @@ image_view.controls.append(ft.Image(src="_blank.jpg", fit=ft.ImageFit.COVER))
 image_view.controls.append(ft.Image(src="_blank.jpg", fit=ft.ImageFit.COVER))
 
 
+# /files view 에서 보여질 파일 리스트
 class FileList(ft.Column):
     def __init__(self):
         super().__init__()
         self.width = 300
         self.height = 600
         self.scroll = ft.ScrollMode.ALWAYS
+        # self.expand = True
 
     def append(self, file_path):
         self.controls.append(FileName(file_path, self.clear_blue))
@@ -27,7 +29,6 @@ class FileList(ft.Column):
 
     def get_files(self, filedir):
         ### getting files
-        # filelist = glob.glob(f"{filedir}/*")
         filelist = get_s3List(filedir)
         get_s3Object(filedir)
         for path in filelist:
@@ -43,6 +44,7 @@ class FileList(ft.Column):
 file_list = FileList()
 
 
+# FileList 에 넣을 FileName
 class FileName(ft.Row):
     def __init__(self, file_path, clear_blue):
         super().__init__()
@@ -59,6 +61,7 @@ class FileName(ft.Row):
         )
         self.controls = [self.check_box, self.text_button]
 
+    #  FileName on_click event handler
     def textbutton_clicked(self, e):
         self.clear_blue()
         self.text_button.style = ft.ButtonStyle(bgcolor=ft.Colors.BLUE)
@@ -69,7 +72,6 @@ class FileName(ft.Row):
                 min_scale=0.1,
                 max_scale=15,
                 boundary_margin=ft.margin.all(20),
-                # content=ft.Image(src=f"{file_path.split("/")[-1]}/{image_name}"),
                 content=ft.Image(src=f"tmp/{image_name}"),
             )
         )
@@ -79,10 +81,7 @@ class FileName(ft.Row):
                 min_scale=0.1,
                 max_scale=15,
                 boundary_margin=ft.margin.all(20),
-                content=ft.Image(
-                    # src=f"{self.file_path.split("/")[0]}_done/{image_name}"
-                    src=f"tmp_done/{image_name}"
-                ),
+                content=ft.Image(src=f"tmp_done/{image_name}"),
             )
         )
 
@@ -90,28 +89,12 @@ class FileName(ft.Row):
         self.update()
 
 
+### main 함수
 def main(page: ft.Page) -> None:
 
     page.title = "Yolo"
 
-    #######################################################
-    files = ft.Column(width=200, height=700, scroll="always")
-
-    img = ft.Column(width=600)
-    img.controls.append(
-        ft.Image(
-            src="image0.jpg",
-            fit=ft.ImageFit.COVER,
-        )
-    )
-    img.controls.append(
-        ft.Image(
-            src="image0.jpg",
-            fit=ft.ImageFit.COVER,
-        )
-    )
-    #######################################################
-
+    # /(root) View TextField on_change event handler
     def textField_changed(e):
         global file_path
         global fileList
@@ -119,10 +102,10 @@ def main(page: ft.Page) -> None:
         fileList = glob.glob(f"{file_path}/*")
         page.update()
 
-    # tf_getDir = ft.TextField(hint_text="src/assets/imgs", label="경로", width=600)
     tf_getDir = ft.TextField(hint_text="Your Bucket Name", label="bucket", width=600)
     tf_getDir.on_change = textField_changed
 
+    # all views event handler
     def on_start(e):
         global file_path
         file_path = tf_getDir.value
@@ -150,6 +133,12 @@ def main(page: ft.Page) -> None:
     def on_goroot(e):
         on_cancer(e)
 
+    def view_pop(e: ft.ViewPopEvent) -> None:
+        page.views.pop()
+        top_view: ft.View = page.views[-1]
+        page.go(top_view.route)
+
+    # page.on_route_change event handler -> page.go() 때 실행
     def route_change(e: ft.RouteChangeEvent) -> None:
         page.views.clear()
 
@@ -170,15 +159,11 @@ def main(page: ft.Page) -> None:
 
         page.update()
 
-    #######################################################
-    ### all views
+    # 초기 root(/) View
     view_root = ft.View(
         route="/",
         controls=[
             ft.AppBar(title=ft.Text("Home"), bgcolor="blue"),
-            # Text(value="경로를 입력 해 주세요", size=30),
-            # ft.TextField(hint_text="C:\\", label="경로 설정",
-            #              width=800, on_change=textbox_changed),
             tf_getDir,
             ft.ElevatedButton(text="Start", on_click=on_start),
         ],
@@ -187,12 +172,11 @@ def main(page: ft.Page) -> None:
         spacing=26,
     )
 
+    #  진행 중 View
     view_progr = ft.View(
         route="/progr",
         controls=[
-            ft.Text(
-                "working...", style="headlineSmall"  # "Indeterminate progress bar",
-            ),
+            ft.Text("working...", style="headlineSmall"),
             ft.ProgressBar(width=400, color="amber", bgcolor="#eeeeee"),
         ],
         vertical_alignment=ft.MainAxisAlignment.CENTER,
@@ -200,11 +184,11 @@ def main(page: ft.Page) -> None:
         spacing=26,
     )
 
+    # file list View
     view_files = ft.View(
         route="/files",
         controls=[
             ft.AppBar(title=ft.Text("progr"), bgcolor="blue"),
-            # ft.Text("Files & Images List", style="headlineSmall"),
             ft.Row(
                 [
                     ft.ElevatedButton(text="Save", on_click=on_save),
@@ -219,6 +203,7 @@ def main(page: ft.Page) -> None:
         spacing=66,
     )
 
+    #  최종 saved View
     view_saved = ft.View(
         route="/saved",
         controls=[
@@ -232,11 +217,6 @@ def main(page: ft.Page) -> None:
     )
 
     #######################################################
-
-    def view_pop(e: ft.ViewPopEvent) -> None:
-        page.views.pop()
-        top_view: ft.View = page.views[-1]
-        page.go(top_view.route)
 
     page.on_route_change = route_change
     page.on_view_pop = view_pop

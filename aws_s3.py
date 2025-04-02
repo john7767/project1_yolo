@@ -1,7 +1,5 @@
-from IPython.display import Image, display
 import os, sys
 import glob
-from pprint import pprint
 import boto3
 import pathlib
 
@@ -11,11 +9,7 @@ extensions = ("jpg", "png")
 bucket_name = ""
 
 
-def set_workingFolder():
-    global workingFolder
-    workingFolder = input("working foler? ")
-
-
+# s3 client 가져오기
 def get_s3Client():
     global bucket_name
 
@@ -30,9 +24,6 @@ def get_s3Client():
     key_id = aws_access_key_id
     access_key = aws_secret_access_key
 
-    # if not bucket_name:
-    #     bucket_name = input("Bucket name? ")
-
     return boto3.client(
         "s3",
         aws_access_key_id=key_id,
@@ -41,6 +32,7 @@ def get_s3Client():
     )
 
 
+# s3 bucket 에서 이미지 리스트 가져오기
 def get_s3List(bName):
     s3 = get_s3Client()
 
@@ -56,6 +48,7 @@ def get_s3List(bName):
     return s3_list
 
 
+# s3 bucket 에서 이미지 가져오기
 def get_s3Object(bucketName):
     s3 = get_s3Client()
 
@@ -73,6 +66,7 @@ def get_s3Object(bucketName):
         )
 
 
+# s3 bucket 에 이미지 저장하기
 def put_s3Object(bucket_name, save_files):
     s3 = get_s3Client()
 
