@@ -9,7 +9,8 @@ import yolo
 root_dir = os.getcwd()
 file_path = ""
 
-image_view = ft.Column(width=600, height=600, scroll=ft.ScrollMode.ALWAYS)
+image_view = ft.Column(width=600, height=600,
+                       scroll=ft.ScrollMode.ALWAYS)  # , expand=True)
 image_view.controls.append(ft.Image(src="_blank.jpg", fit=ft.ImageFit.COVER))
 image_view.controls.append(ft.Image(src="_blank.jpg", fit=ft.ImageFit.COVER))
 
@@ -28,9 +29,9 @@ class FileList(ft.Column):
         self.update()
 
     def get_files(self, filedir):
-        ### getting files
+        # getting files
         filelist = get_s3List(filedir)
-        get_s3Object(filedir)
+        # get_s3Object(filedir)
         for path in filelist:
             self.controls.append(FileName(path, self.clear_blue))
 
@@ -89,7 +90,7 @@ class FileName(ft.Row):
         self.update()
 
 
-### main 함수
+# main 함수
 def main(page: ft.Page) -> None:
 
     page.title = "Yolo"
@@ -102,7 +103,8 @@ def main(page: ft.Page) -> None:
         fileList = glob.glob(f"{file_path}/*")
         page.update()
 
-    tf_getDir = ft.TextField(hint_text="Your Bucket Name", label="bucket", width=600)
+    tf_getDir = ft.TextField(
+        hint_text="", label="Your Bucket Name ?", width=600)
     tf_getDir.on_change = textField_changed
 
     # all views event handler
@@ -121,7 +123,7 @@ def main(page: ft.Page) -> None:
         for control in file_list.controls:
             if control.controls[0].value:
                 save_files.append(control.controls[1].text)
-        put_s3Object(file_path, save_files)
+        # put_s3Object(file_path, save_files)
 
     def on_cancer(e):
         global file_list
@@ -164,8 +166,68 @@ def main(page: ft.Page) -> None:
         route="/",
         controls=[
             ft.AppBar(title=ft.Text("Home"), bgcolor="blue"),
+            ft.Stack(
+                [
+                    ft.Text(
+                        spans=[
+                            ft.TextSpan(
+                                "AI를 활용한 이미지 보안 처리",
+                                ft.TextStyle(
+                                    size=50,
+                                    weight=ft.FontWeight.BOLD,
+                                    foreground=ft.Paint(
+                                        color=ft.Colors.BLUE_700,
+                                        stroke_width=6,
+                                        stroke_join=ft.StrokeJoin.ROUND,
+                                        style=ft.PaintingStyle.STROKE,
+                                    ),
+                                ),
+                            ),
+                        ],
+                    ),
+                    ft.Text(
+                        spans=[
+                            ft.TextSpan(
+                                "AI를 활용한 이미지 보안 처리",
+                                ft.TextStyle(
+                                    size=50,
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.Colors.GREY_300,
+                                ),
+                            ),
+                        ],
+                    ),
+                ]
+            ),
+            # ft.Text(
+            #     spans=[
+            #         ft.TextSpan(
+            #             "Secuard",
+            #             ft.TextStyle(
+            #                 size=30,
+            #                 weight=ft.FontWeight.BOLD,
+            #                 foreground=ft.Paint(
+            #                     gradient=ft.PaintLinearGradient(
+            #                         (0, 20), (150, 20), [
+            #                             ft.Colors.RED, ft.Colors.YELLOW]
+            #                     )
+            #                 ),
+            #             ),
+            #         ),
+            #     ],
+            # ),
+
+            ft.Text(value=f"{' '*60}Secuard", size=30,
+                    text_align=ft.TextAlign.RIGHT,
+                    weight=ft.FontWeight.BOLD,
+                    ),
             tf_getDir,
-            ft.ElevatedButton(text="Start", on_click=on_start),
+            ft.ElevatedButton(
+                text="Start", on_click=on_start,
+                style=ft.ButtonStyle(text_style=ft.TextStyle(
+                    weight=ft.FontWeight.BOLD, size=20),
+                    padding=ft.Padding(30, 10, 30, 10),),
+            )
         ],
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -191,16 +253,26 @@ def main(page: ft.Page) -> None:
             ft.AppBar(title=ft.Text("progr"), bgcolor="blue"),
             ft.Row(
                 [
-                    ft.ElevatedButton(text="Save", on_click=on_save),
-                    ft.ElevatedButton(text="Cancer", on_click=on_cancer),
+                    ft.ElevatedButton(text="Save", on_click=on_save,
+                                      style=ft.ButtonStyle(text_style=ft.TextStyle(
+                                          weight=ft.FontWeight.BOLD, size=25),
+                                          padding=ft.Padding(30, 10, 30, 10)),
+                                      ),
+                    ft.ElevatedButton(text="Cancer", on_click=on_cancer,
+                                      style=ft.ButtonStyle(text_style=ft.TextStyle(
+                                          weight=ft.FontWeight.BOLD, size=25),
+                                          padding=ft.Padding(30, 10, 30, 10),),
+                                      ),
                 ],
-                # expand=1
+                expand=1,
+                alignment=ft.MainAxisAlignment.START
             ),
-            ft.Row([file_list, image_view]),
+            ft.Row([file_list, image_view],
+                   alignment=ft.MainAxisAlignment.SPACE_EVENLY),
         ],
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        spacing=66,
+        spacing=36,
     )
 
     #  최종 saved View
@@ -208,8 +280,13 @@ def main(page: ft.Page) -> None:
         route="/saved",
         controls=[
             ft.AppBar(title=ft.Text("Saved"), bgcolor="blue"),
-            ft.Text("Files Saved", style="headlineSmall"),
-            ft.ElevatedButton(text="Go back", on_click=on_goroot),
+            ft.Text("Files Saved", size=50),  # style="headlineSmall"),
+            ft.ElevatedButton(text="Go back", on_click=on_goroot,
+                              style=ft.ButtonStyle(text_style=ft.TextStyle(
+                                  weight=ft.FontWeight.BOLD, size=25),
+                                  padding=ft.Padding(30, 10, 30, 10),),
+
+                              ),
         ],
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,

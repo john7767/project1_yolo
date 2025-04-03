@@ -2,7 +2,8 @@
 
 import cv2
 from ultralytics import YOLO
-import os, sys
+import os
+import sys
 import glob
 import main
 import flet as ft
@@ -21,7 +22,7 @@ def yolo_detect(file_path):
     model = YOLO("src/yolo/best.pt")
 
     # Run batched inference on a list of images
-    results = model(files, conf=0.47, stream=True)
+    results = model(files, conf=0.25, stream=True)
 
     for result, imgName in zip(results, files):
         boxes = result.boxes  # Boxes object for bounding box outputs
@@ -52,7 +53,7 @@ def yolo_detect(file_path):
             sys.exit(1)
 
         # 이미지 저장
-        cv2.imwrite(f_name, img)  ### (path, img)
+        cv2.imwrite(f_name, img)  # (path, img)
 
 
 if __name__ == "__main__":
